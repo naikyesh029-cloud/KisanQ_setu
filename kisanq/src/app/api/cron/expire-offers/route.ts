@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'node:crypto';
+import { createClient } from '@supabase/supabase-js';
+export async function GET(request:Request){return run(request)}
+export async function POST(request:Request){return run(request)}
+async function run(request:Request){const secret=process.env.CRON_SECRET;if(!secret)return NextResponse.json({error:'CRON_SECRET is not configured.'},{status:503});const received=request.headers.get('authorization')??'';const expected=`Bearer ${secret}`;const receivedBytes=Buffer.from(received);const expectedBytes=Buffer.from(expected);if(receivedBytes.length!==expectedBytes.length||!timingSafeEqual(receivedBytes,expectedBytes))return NextResponse.json({error:'Unauthorized.'},{status:401});const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)return NextResponse.json({error:'Supabase server credentials are not configured.'},{status:503});const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});const {data,error}=await admin.rpc('process_expired_offers');if(error)return NextResponse.json({error:'Expiry job failed. Check database migration and server logs.'},{status:500});return NextResponse.json({ok:true,result:data,processedAt:new Date().toISOString()});}

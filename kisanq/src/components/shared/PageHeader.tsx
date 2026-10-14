@@ -1,0 +1,2 @@
+import type { ReactNode } from 'react';
+export function PageHeader({eyebrow,title,description,action}:{eyebrow?:string;title:string;description?:string;action?:ReactNode}) { return <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',gap:18,flexWrap:'wrap',marginBottom:24}}><div>{eyebrow&&<div className="eyebrow" style={{marginBottom:7}}>{eyebrow}</div>}<h1 className="page-title">{title}</h1>{description&&<p className="muted" style={{margin:'8px 0 0',maxWidth:680}}>{description}</p>}</div>{action&&<div>{action}</div>}</div>; }
